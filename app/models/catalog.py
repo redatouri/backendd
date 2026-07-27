@@ -29,7 +29,12 @@ class Category(UUIDTimestampMixin, Base):
     slug: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    parent: Mapped["Category | None"] = relationship(remote_side="Category.id")
+    parent: Mapped["Category | None"] = relationship(
+        foreign_keys=[parent_id],
+        remote_side=[id],
+        back_populates="children",
+    )
+    children: Mapped[list["Category"]] = relationship(back_populates="parent")
     translations: Mapped[list["CategoryTranslation"]] = relationship(
         cascade="all, delete-orphan"
     )

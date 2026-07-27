@@ -1,5 +1,8 @@
 from decimal import Decimal
+import json
+from typing import Any
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +24,18 @@ class Settings(BaseSettings):
     free_shipping_threshold: Decimal = Decimal("2000.00")
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: Any) -> list[str]:
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.startswith("["):
+                parsed = json.loads(stripped)
+                if isinstance(parsed, list):
+                    return [str(item) for item in parsed]
+            return [part.strip() for part in stripped.split(",") if part.strip()]
+        return value
 
 
 settings = Settings()
