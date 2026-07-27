@@ -112,6 +112,7 @@ class ProductOffer(UUIDTimestampMixin, Base):
     badge: Mapped[str | None] = mapped_column(String(50), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSONB, default=dict)
+    product: Mapped["Product"] = relationship(back_populates="offers")
 
 
 class ProductSpec(UUIDTimestampMixin, Base):

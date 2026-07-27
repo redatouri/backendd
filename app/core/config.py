@@ -14,7 +14,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 7
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "https://moviecam.ma",
+        "https://www.moviecam.ma",
+    ]
     media_root: str = "/app/media"
     media_url_prefix: str = "/media"
     admin_email: str = "admin@moviecam.ma"
