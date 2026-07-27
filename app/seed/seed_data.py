@@ -1,7 +1,7 @@
 import asyncio
 from decimal import Decimal
 
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,7 +19,9 @@ from app.models import (
     ProductTranslation,
 )
 
-password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 CATEGORIES = {
     "cameras": ("Caméras", "كاميرات", "Cameras", ["cameras-mirrorless", "cameras-dslr", "cameras-cinema", "cameras-action", "cameras-webcam-streaming"]),
@@ -81,7 +83,7 @@ async def upsert_category(session: AsyncSession, slug: str, names: tuple[str, st
 async def seed(session: AsyncSession) -> None:
     admin = await session.scalar(select(Admin).where(Admin.email == settings.admin_email))
     if admin is None:
-        session.add(Admin(email=settings.admin_email, password_hash=password_context.hash(settings.admin_password), full_name="Moviecam Admin"))
+        session.add(Admin(email=settings.admin_email, password_hash=hash_password(settings.admin_password), full_name="Moviecam Admin"))
 
     category_ids: dict[str, object] = {}
     for index, (slug, (fr, ar, en, children)) in enumerate(CATEGORIES.items()):

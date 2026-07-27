@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str = (
-        "postgresql+asyncpg://moviecam:moviecam@moviecam_database:5432/moviecam"
+        "postgresql+asyncpg://moviecam:moviecam@database:5432/moviecam"
     )
     jwt_secret: str = "development-only-secret-change-me"
     jwt_algorithm: str = "HS256"

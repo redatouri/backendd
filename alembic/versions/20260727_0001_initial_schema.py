@@ -159,9 +159,9 @@ def upgrade() -> None:
     )
     op.create_table("order_sequences", sa.Column("year", sa.Integer(), primary_key=True), sa.Column("last_number", sa.Integer(), server_default="0", nullable=False))
     op.create_index("idx_products_category", "products", ["category_id"])
-    op.create_index("idx_products_featured", "products", ["is_featured"], postgresql_where=sa.text("is_active"))
+    op.create_index("idx_products_featured", "products", ["is_featured"], postgresql_where=sa.text("is_active = true"))
     op.create_index("idx_orders_status", "orders", ["status"])
-    op.create_index("idx_orders_created", "orders", [sa.text("created_at DESC")])
+    op.create_index("idx_orders_created", "orders", ["created_at"], postgresql_ops={"created_at": "DESC"})
     op.create_index("idx_product_translations_locale", "product_translations", ["locale"])
     op.create_index("idx_category_translations_locale", "category_translations", ["locale"])
 
