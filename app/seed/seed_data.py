@@ -114,6 +114,8 @@ PRODUCT_DESCRIPTIONS: dict[str, str] = {
     ),
 }
 
+REMOVED_PRODUCT_SLUGS = ("dji-mic-2", "dji-rs-4-pro")
+
 PRODUCTS = [
     ("sony-a7iv", "cameras-mirrorless", "Sony A7 IV", "Capturez en 4K 60fps sans compromis", [("Body seul", "SONY-A7IV-BODY", 24999, 29999, 3, None), ("Kit Créateur + 64GB", "SONY-A7IV-KIT", 27499, 31999, 5, "best_value")]),
     ("dji-mic-mini-2-combo", "audio-wireless", "Dji mic mini 2 (2tx + 1 rx + charging case)", "Dji mic mini 2 (2tx + 1 rx + charging case)", [("2 TX + 1 RX + Case", "DJI-MIC-MINI2-COMBO", 1400, None, 8, None)]),
@@ -161,8 +163,25 @@ def copy_seed_media() -> None:
             shutil.copy2(asset, target_dir / asset.name)
 
 
+async def deactivate_removed_products(session: AsyncSession) -> None:
+    for slug in REMOVED_PRODUCT_SLUGS:
+        product = await session.scalar(select(Product).where(Product.slug == slug))
+        if product is None:
+            continue
+        product.is_active = False
+        cross_sells = await session.scalars(
+            select(ProductCrossSell).where(
+                (ProductCrossSell.product_id == product.id)
+                | (ProductCrossSell.cross_sell_product_id == product.id)
+            )
+        )
+        for link in cross_sells:
+            await session.delete(link)
+
+
 async def seed(session: AsyncSession) -> None:
     copy_seed_media()
+    await deactivate_removed_products(session)
     admin = await session.scalar(select(Admin).where(Admin.email == settings.admin_email))
     if admin is None:
         session.add(Admin(email=settings.admin_email, password_hash=hash_password(settings.admin_password), full_name="Moviecam Admin"))
