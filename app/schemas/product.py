@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 
 class OfferOut(BaseModel):
@@ -13,6 +13,10 @@ class OfferOut(BaseModel):
     stock: int
     is_default: bool = False
     badge: str | None = None
+
+    @field_serializer("price", "compare_at_price")
+    def serialize_decimal(self, value: Decimal | None) -> float | None:
+        return float(value) if value is not None else None
 
 
 class CategoryRefOut(BaseModel):
@@ -31,6 +35,10 @@ class ProductListItemOut(BaseModel):
     primary_image: str | None = None
     default_offer: OfferOut | None = None
     category: CategoryRefOut | None = None
+
+    @field_serializer("rating")
+    def serialize_rating(self, value: Decimal) -> float:
+        return float(value)
 
 
 class ProductListOut(BaseModel):
@@ -67,3 +75,7 @@ class ProductDetailOut(BaseModel):
     specs: list[ProductSpecOut] = []
     cross_sells: list[ProductListItemOut] = []
     category: CategoryRefOut | None = None
+
+    @field_serializer("rating")
+    def serialize_rating(self, value: Decimal) -> float:
+        return float(value)
