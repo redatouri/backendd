@@ -403,7 +403,7 @@ def seed_image_urls(slug: str) -> list[str]:
     if slug in PRODUCT_IMAGES:
         return [PRODUCT_IMAGES[slug]]
     count = seed_image_count(slug)
-    return [f"/media/placeholders/{slug}-{index}.webp" for index in range(count)]
+    return [f"/products/{slug}-{index}.webp" for index in range(count)]
 
 
 def product_images_match_slug(urls: list[str], slug: str) -> bool:
@@ -426,7 +426,7 @@ async def sync_seed_product_images(
     current_urls = [image.url for image in existing]
     target_urls = seed_image_urls(slug)
 
-    if product_images_match_slug(current_urls, slug) and len(current_urls) == len(target_urls):
+    if current_urls == target_urls:
         return
 
     for image in existing:

@@ -41,6 +41,8 @@ def media_url(url: str | None) -> str | None:
         return None
     if url.startswith("http"):
         return url
+    if url.startswith("/media/placeholders/"):
+        return "/products/" + url.removeprefix("/media/placeholders/")
     return url
 
 
