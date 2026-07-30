@@ -399,35 +399,54 @@ async def ensure_product_translations(
         translation.meta_description = headline
 
 
-async def ensure_product_images(session: AsyncSession, product_id: object, slug: str, name: str) -> None:
-    image_count = await session.scalar(
-        select(func.count()).select_from(ProductImage).where(ProductImage.product_id == product_id)
-    )
-    if image_count and image_count > 0:
-        return
-
+def seed_image_urls(slug: str) -> list[str]:
     if slug in PRODUCT_IMAGES:
-        session.add(
-            ProductImage(
-                product_id=product_id,
-                url=PRODUCT_IMAGES[slug],
-                alt_text=name,
-                sort_order=0,
-                is_lifestyle=False,
-            )
-        )
+        return [PRODUCT_IMAGES[slug]]
+    count = seed_image_count(slug)
+    return [f"/media/placeholders/{slug}-{index}.webp" for index in range(count)]
+
+
+def product_images_match_slug(urls: list[str], slug: str) -> bool:
+    if not urls:
+        return False
+    return all(f"/{slug}-" in url or f"/{slug}." in url for url in urls)
+
+
+async def sync_seed_product_images(
+    session: AsyncSession,
+    product_id: object,
+    slug: str,
+    name: str,
+) -> None:
+    existing = await session.scalars(
+        select(ProductImage)
+        .where(ProductImage.product_id == product_id)
+        .order_by(ProductImage.sort_order)
+    )
+    current_urls = [image.url for image in existing]
+    target_urls = seed_image_urls(slug)
+
+    if product_images_match_slug(current_urls, slug) and len(current_urls) == len(target_urls):
         return
 
-    for image_index in range(seed_image_count(slug)):
+    for image in existing:
+        await session.delete(image)
+    await session.flush()
+
+    for sort_order, url in enumerate(target_urls):
         session.add(
             ProductImage(
                 product_id=product_id,
-                url=f"/media/placeholders/{slug}-{image_index}.webp",
+                url=url,
                 alt_text=name,
-                sort_order=image_index,
-                is_lifestyle=image_index == seed_image_count(slug) - 1,
+                sort_order=sort_order,
+                is_lifestyle=sort_order == len(target_urls) - 1 and len(target_urls) > 1,
             )
         )
+
+
+async def ensure_product_images(session: AsyncSession, product_id: object, slug: str, name: str) -> None:
+    await sync_seed_product_images(session, product_id, slug, name)
 
 
 async def ensure_product_specs(session: AsyncSession, product_id: object, slug: str) -> None:
@@ -492,6 +511,24 @@ async def create_seed_product(
     await session.flush()
     await apply_seed_product_data(session, product, index, slug, category_slug, name, headline, offers, category_ids)
     return product
+
+
+async def sync_all_seed_product_images(session: AsyncSession) -> int:
+    fixed = 0
+    for _index, (slug, _category_slug, name, _headline, _offers) in enumerate(PRODUCTS):
+        if slug in REMOVED_PRODUCT_SLUGS:
+            continue
+        product = await session.scalar(select(Product).where(Product.slug == slug))
+        if product is None:
+            continue
+        existing = await session.scalars(
+            select(ProductImage).where(ProductImage.product_id == product.id)
+        )
+        before = [image.url for image in existing]
+        await sync_seed_product_images(session, product.id, slug, name)
+        if before != seed_image_urls(slug):
+            fixed += 1
+    return fixed
 
 
 async def sync_missing_seed_products(session: AsyncSession) -> int:
@@ -562,14 +599,7 @@ async def sync_seed_product(session: AsyncSession, product: Product, name: str, 
             await session.delete(offer)
     await session.flush()
     await upsert_product_offers(session, product.id, product.slug, offers)
-
-    if product.slug in PRODUCT_IMAGES:
-        existing_images = await session.scalars(select(ProductImage).where(ProductImage.product_id == product.id))
-        for image in existing_images:
-            await session.delete(image)
-        await session.flush()
-        image_url = PRODUCT_IMAGES[product.slug]
-        session.add(ProductImage(product_id=product.id, url=image_url, alt_text=name, sort_order=0, is_lifestyle=False))
+    await sync_seed_product_images(session, product.id, product.slug, name)
 
 
 async def deactivate_removed_products(session: AsyncSession) -> None:
@@ -614,6 +644,9 @@ async def seed(session: AsyncSession) -> None:
         added = await sync_missing_seed_products(session)
         if added:
             print(f"Light bootstrap: added {added} missing products", flush=True)
+        images_fixed = await sync_all_seed_product_images(session)
+        if images_fixed:
+            print(f"Light bootstrap: fixed images for {images_fixed} products", flush=True)
         await ensure_admin(session)
         return
 
