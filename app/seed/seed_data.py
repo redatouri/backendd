@@ -116,8 +116,84 @@ PRODUCT_DESCRIPTIONS: dict[str, str] = {
 
 REMOVED_PRODUCT_SLUGS = ("dji-mic-2", "dji-rs-4-pro")
 
+PRODUCT_IMAGES = {
+    "sony-a7iv": "/media/placeholders/sony-a7iv-0.png",
+    "sony-fx3": "/media/placeholders/sony-fx3-0.png",
+    "sony-a7iii": "/media/placeholders/sony-a7iii-0.png",
+    "sony-fe-50mm-f18": "/media/placeholders/sony-fe-50mm-f18-0.png",
+    "sony-fe-24-70-f4": "/media/placeholders/sony-fe-24-70-f4-0.png",
+    "sony-fe-24-70-f28-gm": "/media/placeholders/sony-fe-24-70-f28-gm-0.png",
+    "sony-np-fz100": "/media/placeholders/sony-np-fz100-0.png",
+    "sony-fx30": "/media/placeholders/sony-fx30-0.png",
+    "dji-osmo-pocket-4-creator-combo": "/media/placeholders/dji-osmo-pocket-4-creator-combo-0.png",
+    "dji-osmo-pocket-4-standard": "/media/placeholders/dji-osmo-pocket-4-standard-0.png",
+    "godox-v1-sony": "/media/placeholders/godox-v1-sony-0.png",
+    "godox-ak-r22": "/media/placeholders/godox-ak-r22-0.png",
+    "godox-lc500r-mini": "/media/placeholders/godox-lc500r-mini-0.png",
+    "kf-concept-nano-b-nd2-400": "/media/placeholders/kf-concept-nano-b-nd2-400-0.png",
+    "hollyland-lark-m2s": "/media/placeholders/hollyland-lark-m2s-0.png",
+    "torche-r8-led-rgb": "/media/placeholders/torche-r8-led-rgb-0.png",
+    "desview-p5-ii": "/media/placeholders/desview-p5-ii-0.png",
+    "feelworld-f5-prox": "/media/placeholders/feelworld-f5-prox-0.png",
+    "zoom-h8": "/media/placeholders/zoom-h8-0.png",
+    "lexar-multi-card-reader": "/media/placeholders/lexar-multi-card-reader-0.png",
+    "c-stand-support": "/media/placeholders/c-stand-support-0.png",
+    "stand-inox": "/media/placeholders/stand-inox-0.png",
+    "fond-papier-272-11m-bleu": "/media/placeholders/fond-papier-272-11m-bleu-0.png",
+    "fond-papier-272-11m-blanc": "/media/placeholders/fond-papier-272-11m-blanc-0.png",
+    "fond-papier-272-11m-rouge": "/media/placeholders/fond-papier-272-11m-rouge-0.png",
+    "fond-papier-272-11m-jaune": "/media/placeholders/fond-papier-272-11m-jaune-0.png",
+    "fond-papier-272-11m-noir": "/media/placeholders/fond-papier-272-11m-noir-0.png",
+    "fond-papier-272-11m-vert": "/media/placeholders/fond-papier-272-11m-vert-0.png",
+    "derouleur-fond-mural-3-fonds": "/media/placeholders/derouleur-fond-mural-3-fonds-0.png",
+    "derouleur-fond-mural-4-fonds": "/media/placeholders/derouleur-fond-mural-4-fonds-0.png",
+    "mini-c-stand": "/media/placeholders/mini-c-stand-0.png",
+    "lexar-professional-128-v90-uhs2": "/media/placeholders/lexar-professional-128-v90-uhs2-0.png",
+    "sandisk-extreme-pro-128-v30": "/media/placeholders/sandisk-extreme-pro-128-v30-0.png",
+    "sandisk-extreme-pro-64-v30": "/media/placeholders/sandisk-extreme-pro-64-v30-0.png",
+    "sandisk-extreme-pro-sdxc-200-v30": "/media/placeholders/sandisk-extreme-pro-sdxc-200-v30-0.png",
+    "boya-by-bm6060": "/media/placeholders/boya-by-bm6060-0.png",
+    "godox-iflash-im30": "/media/placeholders/godox-iflash-im30-0.png",
+}
+
 PRODUCTS = [
-    ("sony-a7iv", "cameras-mirrorless", "Sony A7 IV", "Capturez en 4K 60fps sans compromis", [("Body seul", "SONY-A7IV-BODY", 24999, 29999, 3, None), ("Kit Créateur + 64GB", "SONY-A7IV-KIT", 27499, 31999, 5, "best_value")]),
+    ("sony-a7iv", "cameras-mirrorless", "Sony alpha 7 iv Neuf", "Sony alpha 7 iv Neuf", [("Neuf", "SONY-A7IV-NEUF", 21999, None, 3, None)]),
+    ("sony-fx3", "cameras-cinema", "Sony fx3 neuf", "Sony fx3 neuf", [("Neuf", "SONY-FX3-NEUF", 36999, None, 2, None)]),
+    ("sony-a7iii", "cameras-mirrorless", "Sony a7 iii neuf", "Sony a7 iii neuf", [("Neuf", "SONY-A7III-NEUF", 13999, None, 4, None)]),
+    ("sony-fe-50mm-f18", "lenses-prime", "Sony 50mm f1.8 neuf", "Sony 50mm f1.8 neuf", [("Neuf", "SONY-FE50F18-NEUF", 2499, None, 8, None)]),
+    ("sony-fe-24-70-f4", "lenses-zoom", "Sony fe 24-70mm f/4 g oss carl zeiss - neuf", "Sony fe 24-70mm f/4 g oss carl zeiss - neuf", [("Neuf", "SONY-FE2470F4-NEUF", 6399, None, 5, None)]),
+    ("sony-fe-24-70-f28-gm", "lenses-zoom", "Sony fe 24-70mm f/2.8 GM - neuf", "Sony fe 24-70mm f/2.8 GM - neuf", [("Neuf", "SONY-FE2470F28GM-NEUF", 15699, None, 3, None)]),
+    ("sony-np-fz100", "batteries-camera", "Sony NP-FZ100", "Sony NP-FZ100", [("Neuf", "SONY-NPFZ100", 300, None, 15, None)]),
+    ("sony-fx30", "cameras-cinema", "Sony fx30 bon occasion", "Sony fx30 bon occasion", [("Bon occasion", "SONY-FX30-OCC", 15999, None, 1, None)]),
+    ("dji-osmo-pocket-4-creator-combo", "action-cameras", "Dji osmo pocket 4 creator combo", "Dji osmo pocket 4 creator combo", [("Creator Combo", "DJI-OP4-CREATOR", 7800, None, 5, None)]),
+    ("dji-osmo-pocket-4-standard", "action-cameras", "Dji osmo pocket 4 standard", "Dji osmo pocket 4 standard", [("Standard", "DJI-OP4-STD", 6100, None, 6, None)]),
+    ("godox-v1-sony", "lighting-led-panels", "Godox v1 sony", "Godox v1 sony", [("Neuf", "GODOX-V1-SONY", 1999, None, 8, None)]),
+    ("godox-ak-r22", "lighting-softboxes", "Godox ak-r22", "Godox ak-r22", [("Neuf", "GODOX-AKR22", 299, None, 12, None)]),
+    ("godox-lc500r-mini", "lighting-tubes", "Godox lc500r mini", "Godox lc500r mini", [("Neuf", "GODOX-LC500R-MINI", 1450, None, 6, None)]),
+    ("kf-concept-nano-b-nd2-400", "accessories-filters", "K&F Concept Nano-B Filtre ND2-400", "K&F Concept Nano-B Filtre ND2-400", [("Neuf", "KF-NANOB-ND2400", 350, None, 10, None)]),
+    ("hollyland-lark-m2s", "audio-wireless", "Hollyland lark m2s", "Hollyland lark m2s", [("Neuf", "HOLLYLAND-LARK-M2S", 1400, None, 8, None)]),
+    ("torche-r8-led-rgb", "lighting-led-panels", "Torche R8 LED RGB", "Torche R8 LED RGB", [("Neuf", "TORCHE-R8-RGB", 899, None, 10, None)]),
+    ("desview-p5-ii", "monitors-on-camera", "BESTVIEW DESVIEW P5 II 5,5'' Full HD", "BESTVIEW DESVIEW P5 II 5,5'' Full HD", [("Neuf", "DESVIEW-P5-II", 1500, None, 5, None)]),
+    ("feelworld-f5-prox", "monitors-on-camera", "FEELWORLD F5 PROX 5.5″ Écran Tactile (4K-HDMI) DSLR Caméra Moniteur de Champ 1600nit", "FEELWORLD F5 PROX 5.5″ Écran Tactile (4K-HDMI) DSLR Caméra Moniteur de Champ 1600nit", [("Neuf", "FEELWORLD-F5-PROX", 1800, None, 4, None)]),
+    ("zoom-h8", "audio-recorders", "Zoom h8", "Zoom h8", [("Neuf", "ZOOM-H8", 5800, None, 3, None)]),
+    ("lexar-multi-card-reader", "memory-readers", "Lecteur carte Lexar Multi-Card 3in1 USB 3.1", "Lecteur carte Lexar Multi-Card 3in1 USB 3.1", [("Neuf", "LEXAR-READER-3IN1", 350, None, 12, None)]),
+    ("c-stand-support", "lighting-stands", "C-stand support", "C-stand support", [("Neuf", "CSTAND-SUPPORT", 1300, None, 4, None)]),
+    ("stand-inox", "lighting-stands", "Stand inox", "Stand inox", [("Neuf", "STAND-INOX", 600, None, 8, None)]),
+    ("fond-papier-272-11m-bleu", "studio-packs-photo", "Fond Papier 2,72 X 11m – Bleu", "Fond Papier 2,72 X 11m – Bleu", [("Neuf", "FOND-PAPIER-BLEU", 650, None, 6, None)]),
+    ("fond-papier-272-11m-blanc", "studio-packs-photo", "Fond Papier 2,72 X 11m - Blanc", "Fond Papier 2,72 X 11m - Blanc", [("Neuf", "FOND-PAPIER-BLANC", 650, None, 6, None)]),
+    ("fond-papier-272-11m-rouge", "studio-packs-photo", "Fond Papier 2,72 X 11m – Rouge", "Fond Papier 2,72 X 11m – Rouge", [("Neuf", "FOND-PAPIER-ROUGE", 650, None, 6, None)]),
+    ("fond-papier-272-11m-jaune", "studio-packs-photo", "Fond Papier 2,72 X 11m – Jaune", "Fond Papier 2,72 X 11m – Jaune", [("Neuf", "FOND-PAPIER-JAUNE", 650, None, 6, None)]),
+    ("fond-papier-272-11m-noir", "studio-packs-photo", "Fond Papier 2,72 X 11m – Noir", "Fond Papier 2,72 X 11m – Noir", [("Neuf", "FOND-PAPIER-NOIR", 650, None, 6, None)]),
+    ("fond-papier-272-11m-vert", "studio-packs-photo", "Fond Papier 2,72 X 11m – Vert", "Fond Papier 2,72 X 11m – Vert", [("Neuf", "FOND-PAPIER-VERT", 650, None, 6, None)]),
+    ("derouleur-fond-mural-3-fonds", "studio-packs-photo", "Dérouleur fond photo à fixations murales de 3 fonds", "Dérouleur fond photo à fixations murales de 3 fonds", [("Neuf", "DEROULEUR-3-FONDS", 950, None, 4, None)]),
+    ("derouleur-fond-mural-4-fonds", "studio-packs-photo", "Dérouleur fond photo à fixations murales de 4 fonds", "Dérouleur fond photo à fixations murales de 4 fonds", [("Neuf", "DEROULEUR-4-FONDS", 1300, None, 3, None)]),
+    ("mini-c-stand", "lighting-stands", "Mini C-stand", "Mini C-stand", [("Neuf", "MINI-CSTAND", 599, None, 6, None)]),
+    ("lexar-professional-128-v90-uhs2", "memory-sd-cf", "Lexar 128GB V90 Professional 2000x UHS-II SDXC", "Lexar 128GB V90 Professional 2000x UHS-II SDXC", [("Neuf", "LEXAR-128-V90-UHS2", 1600, None, 8, None)]),
+    ("sandisk-extreme-pro-128-v30", "memory-sd-cf", "SANDISK EXTREME PRO 128Go 200MB/s V30 U3", "SANDISK EXTREME PRO 128Go 200MB/s V30 U3", [("Neuf", "SANDISK-EP-128-V30", 400, None, 15, None)]),
+    ("sandisk-extreme-pro-64-v30", "memory-sd-cf", "SANDISK EXTREME PRO 64Go 200MB/s V30", "SANDISK EXTREME PRO 64Go 200MB/s V30", [("Neuf", "SANDISK-EP-64-V30", 300, None, 18, None)]),
+    ("sandisk-extreme-pro-sdxc-200-v30", "memory-sd-cf", "SANDISK EXTREME PRO SDXC UHS-I 200MB V30", "SANDISK EXTREME PRO SDXC UHS-I 200MB V30", [("Neuf", "SANDISK-EP-SDXC-200-V30", 750, None, 12, None)]),
+    ("boya-by-bm6060", "audio-microphones-shotgun", "BOYA BY-BM6060 Shotgun Mic", "BOYA BY-BM6060 Shotgun Mic", [("Neuf", "BOYA-BM6060", 1100, None, 5, None)]),
+    ("godox-iflash-im30", "lighting-led-panels", "Godox iflash im30", "Godox iflash im30", [("Neuf", "GODOX-IFLASH-IM30", 650, None, 10, None)]),
     ("dji-mic-mini-2-combo", "audio-wireless", "Dji mic mini 2 (2tx + 1 rx + charging case)", "Dji mic mini 2 (2tx + 1 rx + charging case)", [("2 TX + 1 RX + Case", "DJI-MIC-MINI2-COMBO", 1400, None, 8, None)]),
     ("rod-videomic-pro-plus", "audio-microphones-shotgun", "Rode VideoMic Pro+", "Le micro canon préféré des vidéastes", [("Standard", "RODE-VM-PRO-PLUS", 2799, None, 6, None)]),
     ("dji-rs4-mini", "stabilization-gimbals", "Dji rs4 mini", "Dji rs4 mini", [("Standard", "DJI-RS4-MINI", 3400, None, 6, None)]),
@@ -163,6 +239,30 @@ def copy_seed_media() -> None:
             shutil.copy2(asset, target_dir / asset.name)
 
 
+async def sync_seed_product(session: AsyncSession, product: Product, name: str, headline: str, offers: list) -> None:
+    translations = await session.scalars(select(ProductTranslation).where(ProductTranslation.product_id == product.id))
+    for translation in translations:
+        translation.name = name
+        translation.headline = headline
+        translation.short_description = headline
+        translation.meta_title = name
+        translation.meta_description = headline
+
+    existing_offers = await session.scalars(select(ProductOffer).where(ProductOffer.product_id == product.id))
+    for offer in existing_offers:
+        await session.delete(offer)
+    await session.flush()
+    for offer_index, (label, sku, price, compare_at, stock, badge) in enumerate(offers):
+        session.add(ProductOffer(product_id=product.id, sku=sku, label=label, price=Decimal(str(price)), compare_at_price=Decimal(str(compare_at)) if compare_at else None, stock=stock, is_default=offer_index == 0, badge=badge, sort_order=offer_index))
+
+    existing_images = await session.scalars(select(ProductImage).where(ProductImage.product_id == product.id))
+    for image in existing_images:
+        await session.delete(image)
+    await session.flush()
+    image_url = PRODUCT_IMAGES[product.slug]
+    session.add(ProductImage(product_id=product.id, url=image_url, alt_text=name, sort_order=0, is_lifestyle=False))
+
+
 async def deactivate_removed_products(session: AsyncSession) -> None:
     for slug in REMOVED_PRODUCT_SLUGS:
         product = await session.scalar(select(Product).where(Product.slug == slug))
@@ -206,26 +306,31 @@ async def seed(session: AsyncSession) -> None:
             for locale in ("fr", "ar", "en"):
                 description = PRODUCT_DESCRIPTIONS.get(slug, f"{headline}. Pensé pour les créateurs exigeants au Maroc.")
                 session.add(ProductTranslation(product_id=product.id, locale=locale, name=name, headline=headline, subheadline="Équipement professionnel, original et garanti.", description=description, short_description=headline, meta_title=name, meta_description=headline))
-            image_count = {
-                "dji-osmo-nano-128gb": 1,
-                "dji-osmo-mobile-7": 5,
-                "dji-osmo-mobile-7p": 2,
-                "dji-osmo-mobile-8": 3,
-                "dji-action-6-standard": 3,
-                "dji-action-6-adventure-combo": 3,
-                "dji-rs4-mini": 3,
-                "dji-rs5": 3,
-            }.get(slug, 4)
-            for image_index in range(image_count):
-                session.add(ProductImage(product_id=product.id, url=f"/media/placeholders/{slug}-{image_index}.webp", alt_text=name, sort_order=image_index, is_lifestyle=image_index == image_count - 1))
+            if slug in PRODUCT_IMAGES:
+                session.add(ProductImage(product_id=product.id, url=PRODUCT_IMAGES[slug], alt_text=name, sort_order=0, is_lifestyle=False))
+            else:
+                image_count = {
+                    "dji-osmo-nano-128gb": 1,
+                    "dji-osmo-mobile-7": 5,
+                    "dji-osmo-mobile-7p": 2,
+                    "dji-osmo-mobile-8": 3,
+                    "dji-action-6-standard": 3,
+                    "dji-action-6-adventure-combo": 3,
+                    "dji-rs4-mini": 3,
+                    "dji-rs5": 3,
+                }.get(slug, 4)
+                for image_index in range(image_count):
+                    session.add(ProductImage(product_id=product.id, url=f"/media/placeholders/{slug}-{image_index}.webp", alt_text=name, sort_order=image_index, is_lifestyle=image_index == image_count - 1))
             for sort_order, (spec_key, spec_value) in enumerate(PRODUCT_SPECS.get(slug, DEFAULT_PRODUCT_SPECS)):
                 session.add(ProductSpec(product_id=product.id, locale="fr", spec_key=spec_key, spec_value=spec_value, sort_order=sort_order))
             for offer_index, (label, sku, price, compare_at, stock, badge) in enumerate(offers):
                 session.add(ProductOffer(product_id=product.id, sku=sku, label=label, price=Decimal(str(price)), compare_at_price=Decimal(str(compare_at)) if compare_at else None, stock=stock, is_default=offer_index == 0, badge=badge, sort_order=offer_index))
+        elif slug in PRODUCT_IMAGES:
+            await sync_seed_product(session, product, name, headline, offers)
         product_ids[slug] = product.id
     await session.flush()
 
-    for source, targets in {"sony-a7iv": ["sandisk-extreme-pro-256", "sony-np-fz100-twin", "smallrig-cage-a7iv"], "dji-mic-mini-2-combo": ["sandisk-extreme-pro-256", "rod-videomic-pro-plus"], "pack-podcast-starter": ["dji-mic-mini-2-combo", "rod-videomic-pro-plus"], "dji-rs4-mini": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-mic-mini-2-combo"], "dji-rs5": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-rs4-mini"], "dji-osmo-mobile-7": ["dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-mobile-7p": ["dji-osmo-mobile-7", "dji-osmo-pocket-3-standard"], "dji-osmo-mobile-8": ["dji-osmo-mobile-7p", "dji-osmo-pocket-3-standard"], "dji-osmo-pocket-3-standard": ["sandisk-extreme-pro-256", "dji-mic-mini-2-combo"], "dji-osmo-pocket-3-creator-combo": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-nano-128gb": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard"], "dji-action-6-standard": ["sandisk-extreme-pro-256", "dji-osmo-nano-128gb", "dji-mic-mini-2-combo"], "dji-action-6-adventure-combo": ["dji-action-6-standard", "sandisk-extreme-pro-256", "dji-mic-mini-2-combo"]}.items():
+    for source, targets in {"sony-a7iv": ["sandisk-extreme-pro-256", "sony-np-fz100", "smallrig-cage-a7iv", "sony-fe-50mm-f18"], "sony-fx3": ["sandisk-extreme-pro-256", "sony-np-fz100", "sony-a7iv", "sony-fe-24-70-f28-gm"], "sony-a7iii": ["sandisk-extreme-pro-256", "sony-np-fz100", "sony-a7iv", "sony-fe-50mm-f18"], "sony-fe-50mm-f18": ["sony-a7iv", "sony-a7iii"], "sony-fe-24-70-f4": ["sony-a7iii", "sandisk-extreme-pro-256"], "sony-fe-24-70-f28-gm": ["sony-a7iv", "sony-fx3", "sandisk-extreme-pro-256"], "sony-np-fz100": ["sony-a7iv", "sony-fx3", "sony-fx30"], "sony-fx30": ["sony-np-fz100", "sandisk-extreme-pro-256", "sony-fe-24-70-f28-gm"], "dji-osmo-pocket-4-creator-combo": ["sandisk-extreme-pro-256", "dji-osmo-pocket-4-standard", "dji-mic-mini-2-combo"], "dji-osmo-pocket-4-standard": ["sandisk-extreme-pro-256", "dji-osmo-pocket-4-creator-combo", "dji-mic-mini-2-combo"], "godox-v1-sony": ["godox-ak-r22", "godox-lc500r-mini"], "godox-ak-r22": ["godox-v1-sony", "godox-lc500r-mini"], "godox-lc500r-mini": ["godox-v1-sony", "godox-ak-r22"], "dji-mic-mini-2-combo": ["sandisk-extreme-pro-256", "rod-videomic-pro-plus"], "pack-podcast-starter": ["dji-mic-mini-2-combo", "rod-videomic-pro-plus"], "dji-rs4-mini": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-mic-mini-2-combo"], "dji-rs5": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-rs4-mini"], "dji-osmo-mobile-7": ["dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-mobile-7p": ["dji-osmo-mobile-7", "dji-osmo-pocket-3-standard"], "dji-osmo-mobile-8": ["dji-osmo-mobile-7p", "dji-osmo-pocket-3-standard"], "dji-osmo-pocket-3-standard": ["sandisk-extreme-pro-256", "dji-mic-mini-2-combo"], "dji-osmo-pocket-3-creator-combo": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-nano-128gb": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard"], "dji-action-6-standard": ["sandisk-extreme-pro-256", "dji-osmo-nano-128gb", "dji-mic-mini-2-combo"], "dji-action-6-adventure-combo": ["dji-action-6-standard", "sandisk-extreme-pro-256", "dji-mic-mini-2-combo"]}.items():
         for priority, target in enumerate(targets):
             exists = await session.scalar(select(ProductCrossSell).where(ProductCrossSell.product_id == product_ids[source], ProductCrossSell.cross_sell_product_id == product_ids[target]))
             if exists is None:
