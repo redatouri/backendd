@@ -46,6 +46,23 @@ def media_url(url: str | None) -> str | None:
     return url
 
 
+def image_belongs_to_product(url: str, slug: str) -> bool:
+    filename = url.rsplit("/", 1)[-1]
+    return filename.startswith(f"{slug}-") or filename.startswith(f"{slug}.")
+
+
+def sanitize_product_images(images: list, slug: str) -> list:
+    seen: set[str] = set()
+    cleaned: list = []
+    for img in sorted(images, key=lambda i: i.sort_order):
+        url = media_url(img.url)
+        if not url or url in seen or not image_belongs_to_product(url, slug):
+            continue
+        seen.add(url)
+        cleaned.append(img)
+    return cleaned
+
+
 def offer_out(offer: ProductOffer) -> OfferOut:
     return OfferOut(
         id=offer.id,
@@ -172,7 +189,7 @@ async def serialize_product_list_item(
         return None
     offers = sorted(product.offers, key=lambda o: o.sort_order)
     d_offer = default_offer(offers)
-    images = sorted(product.images, key=lambda i: i.sort_order)
+    images = sanitize_product_images(product.images, product.slug)
     primary = media_url(images[0].url) if images else None
     cat_ref = None
     if product.category:
@@ -331,7 +348,7 @@ async def get_product(db: AsyncSession, slug: str, locale: str) -> ProductDetail
                 is_lifestyle=img.is_lifestyle,
                 sort_order=img.sort_order,
             )
-            for img in sorted(product.images, key=lambda i: i.sort_order)
+            for img in sanitize_product_images(product.images, product.slug)
         ],
         offers=[offer_out(o) for o in sorted(product.offers, key=lambda o: o.sort_order)],
         specs=specs,
