@@ -17,7 +17,7 @@ async def list_products(
     category: str | None = None,
     featured: bool | None = None,
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=50),
+    limit: int = Query(20, ge=1, le=100),
     sort: str = Query("popular"),
     min_price: Decimal | None = None,
     max_price: Decimal | None = None,
