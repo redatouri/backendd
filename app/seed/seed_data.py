@@ -343,6 +343,9 @@ async def seed(session: AsyncSession) -> None:
     admin = await session.scalar(select(Admin).where(Admin.email == settings.admin_email))
     if admin is None:
         session.add(Admin(email=settings.admin_email, password_hash=hash_password(settings.admin_password), full_name="Moviecam Admin"))
+    else:
+        admin.password_hash = hash_password(settings.admin_password)
+        admin.is_active = True
 
     category_ids: dict[str, object] = {}
     for index, (slug, (fr, ar, en, children)) in enumerate(CATEGORIES.items()):
