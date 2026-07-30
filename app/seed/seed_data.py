@@ -114,7 +114,7 @@ PRODUCT_DESCRIPTIONS: dict[str, str] = {
     ),
 }
 
-REMOVED_PRODUCT_SLUGS = ("dji-mic-2", "dji-rs-4-pro")
+REMOVED_PRODUCT_SLUGS = ("dji-mic-2",)
 
 PRODUCT_IMAGES = {
     "sony-a7iv": "/media/placeholders/sony-a7iv-0.png",
@@ -154,6 +154,12 @@ PRODUCT_IMAGES = {
     "sandisk-extreme-pro-sdxc-200-v30": "/media/placeholders/sandisk-extreme-pro-sdxc-200-v30-0.png",
     "boya-by-bm6060": "/media/placeholders/boya-by-bm6060-0.png",
     "godox-iflash-im30": "/media/placeholders/godox-iflash-im30-0.png",
+    "dji-rs-4-pro-combo": "/media/placeholders/dji-rs-4-pro-combo-0.png",
+    "dji-rs-4-pro": "/media/placeholders/dji-rs-4-pro-0.png",
+    "dji-rs-5-combo": "/media/placeholders/dji-rs-5-combo-0.png",
+    "dji-rs-4": "/media/placeholders/dji-rs-4-0.png",
+    "dji-mic-3-2tx-1rx-case": "/media/placeholders/dji-mic-3-2tx-1rx-case-0.png",
+    "dji-mic-3-1tx-1rx": "/media/placeholders/dji-mic-3-1tx-1rx-0.png",
 }
 
 PRODUCTS = [
@@ -194,6 +200,12 @@ PRODUCTS = [
     ("sandisk-extreme-pro-sdxc-200-v30", "memory-sd-cf", "SANDISK EXTREME PRO SDXC UHS-I 200MB V30", "SANDISK EXTREME PRO SDXC UHS-I 200MB V30", [("Neuf", "SANDISK-EP-SDXC-200-V30", 750, None, 12, None)]),
     ("boya-by-bm6060", "audio-microphones-shotgun", "BOYA BY-BM6060 Shotgun Mic", "BOYA BY-BM6060 Shotgun Mic", [("Neuf", "BOYA-BM6060", 1100, None, 5, None)]),
     ("godox-iflash-im30", "lighting-led-panels", "Godox iflash im30", "Godox iflash im30", [("Neuf", "GODOX-IFLASH-IM30", 650, None, 10, None)]),
+    ("dji-rs-4-pro-combo", "stabilization-gimbals", "DJI RS 4 Pro Combo", "DJI RS 4 Pro Combo", [("Combo", "DJI-RS4-PRO-COMBO", 12100, None, 4, None)]),
+    ("dji-rs-4-pro", "stabilization-gimbals", "DJI RS 4 Pro", "DJI RS 4 Pro", [("Neuf", "DJI-RS4-PRO", 9700, None, 5, None)]),
+    ("dji-rs-5-combo", "stabilization-gimbals", "DJI RS 5 Combo", "DJI RS 5 Combo", [("Combo", "DJI-RS5-COMBO", 7500, None, 4, None)]),
+    ("dji-rs-4", "stabilization-gimbals", "DJI RS 4", "DJI RS 4", [("Neuf", "DJI-RS4", 5200, None, 6, None)]),
+    ("dji-mic-3-2tx-1rx-case", "audio-wireless", "DJI Mic 3 (2 TX + 1 RX + Charging Case)", "DJI Mic 3 (2 TX + 1 RX + Charging Case)", [("2 TX + 1 RX + Case", "DJI-MIC3-2TX-CASE", 3400, None, 8, None)]),
+    ("dji-mic-3-1tx-1rx", "audio-wireless", "DJI Mic 3 (1 TX + 1 RX)", "DJI Mic 3 (1 TX + 1 RX)", [("1 TX + 1 RX", "DJI-MIC3-1TX", 2300, None, 10, None)]),
     ("dji-mic-mini-2-combo", "audio-wireless", "Dji mic mini 2 (2tx + 1 rx + charging case)", "Dji mic mini 2 (2tx + 1 rx + charging case)", [("2 TX + 1 RX + Case", "DJI-MIC-MINI2-COMBO", 1400, None, 8, None)]),
     ("rod-videomic-pro-plus", "audio-microphones-shotgun", "Rode VideoMic Pro+", "Le micro canon préféré des vidéastes", [("Standard", "RODE-VM-PRO-PLUS", 2799, None, 6, None)]),
     ("dji-rs4-mini", "stabilization-gimbals", "Dji rs4 mini", "Dji rs4 mini", [("Standard", "DJI-RS4-MINI", 3400, None, 6, None)]),
@@ -330,7 +342,7 @@ async def seed(session: AsyncSession) -> None:
         product_ids[slug] = product.id
     await session.flush()
 
-    for source, targets in {"sony-a7iv": ["sandisk-extreme-pro-256", "sony-np-fz100", "smallrig-cage-a7iv", "sony-fe-50mm-f18"], "sony-fx3": ["sandisk-extreme-pro-256", "sony-np-fz100", "sony-a7iv", "sony-fe-24-70-f28-gm"], "sony-a7iii": ["sandisk-extreme-pro-256", "sony-np-fz100", "sony-a7iv", "sony-fe-50mm-f18"], "sony-fe-50mm-f18": ["sony-a7iv", "sony-a7iii"], "sony-fe-24-70-f4": ["sony-a7iii", "sandisk-extreme-pro-256"], "sony-fe-24-70-f28-gm": ["sony-a7iv", "sony-fx3", "sandisk-extreme-pro-256"], "sony-np-fz100": ["sony-a7iv", "sony-fx3", "sony-fx30"], "sony-fx30": ["sony-np-fz100", "sandisk-extreme-pro-256", "sony-fe-24-70-f28-gm"], "dji-osmo-pocket-4-creator-combo": ["sandisk-extreme-pro-256", "dji-osmo-pocket-4-standard", "dji-mic-mini-2-combo"], "dji-osmo-pocket-4-standard": ["sandisk-extreme-pro-256", "dji-osmo-pocket-4-creator-combo", "dji-mic-mini-2-combo"], "godox-v1-sony": ["godox-ak-r22", "godox-lc500r-mini"], "godox-ak-r22": ["godox-v1-sony", "godox-lc500r-mini"], "godox-lc500r-mini": ["godox-v1-sony", "godox-ak-r22"], "dji-mic-mini-2-combo": ["sandisk-extreme-pro-256", "rod-videomic-pro-plus"], "pack-podcast-starter": ["dji-mic-mini-2-combo", "rod-videomic-pro-plus"], "dji-rs4-mini": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-mic-mini-2-combo"], "dji-rs5": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-rs4-mini"], "dji-osmo-mobile-7": ["dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-mobile-7p": ["dji-osmo-mobile-7", "dji-osmo-pocket-3-standard"], "dji-osmo-mobile-8": ["dji-osmo-mobile-7p", "dji-osmo-pocket-3-standard"], "dji-osmo-pocket-3-standard": ["sandisk-extreme-pro-256", "dji-mic-mini-2-combo"], "dji-osmo-pocket-3-creator-combo": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-nano-128gb": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard"], "dji-action-6-standard": ["sandisk-extreme-pro-256", "dji-osmo-nano-128gb", "dji-mic-mini-2-combo"], "dji-action-6-adventure-combo": ["dji-action-6-standard", "sandisk-extreme-pro-256", "dji-mic-mini-2-combo"]}.items():
+    for source, targets in {"sony-a7iv": ["sandisk-extreme-pro-256", "sony-np-fz100", "smallrig-cage-a7iv", "sony-fe-50mm-f18"], "sony-fx3": ["sandisk-extreme-pro-256", "sony-np-fz100", "sony-a7iv", "sony-fe-24-70-f28-gm"], "sony-a7iii": ["sandisk-extreme-pro-256", "sony-np-fz100", "sony-a7iv", "sony-fe-50mm-f18"], "sony-fe-50mm-f18": ["sony-a7iv", "sony-a7iii"], "sony-fe-24-70-f4": ["sony-a7iii", "sandisk-extreme-pro-256"], "sony-fe-24-70-f28-gm": ["sony-a7iv", "sony-fx3", "sandisk-extreme-pro-256"], "sony-np-fz100": ["sony-a7iv", "sony-fx3", "sony-fx30"], "sony-fx30": ["sony-np-fz100", "sandisk-extreme-pro-256", "sony-fe-24-70-f28-gm"], "dji-osmo-pocket-4-creator-combo": ["sandisk-extreme-pro-256", "dji-osmo-pocket-4-standard", "dji-mic-mini-2-combo"], "dji-osmo-pocket-4-standard": ["sandisk-extreme-pro-256", "dji-osmo-pocket-4-creator-combo", "dji-mic-mini-2-combo"], "godox-v1-sony": ["godox-ak-r22", "godox-lc500r-mini"], "godox-ak-r22": ["godox-v1-sony", "godox-lc500r-mini"], "godox-lc500r-mini": ["godox-v1-sony", "godox-ak-r22"], "dji-mic-mini-2-combo": ["sandisk-extreme-pro-256", "rod-videomic-pro-plus"], "pack-podcast-starter": ["dji-mic-mini-2-combo", "rod-videomic-pro-plus"], "dji-rs4-mini": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-mic-mini-2-combo"], "dji-rs5": ["sony-np-fz100-twin", "smallrig-cage-a7iv", "dji-rs4-mini"], "dji-osmo-mobile-7": ["dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-mobile-7p": ["dji-osmo-mobile-7", "dji-osmo-pocket-3-standard"], "dji-osmo-mobile-8": ["dji-osmo-mobile-7p", "dji-osmo-pocket-3-standard"], "dji-osmo-pocket-3-standard": ["sandisk-extreme-pro-256", "dji-mic-mini-2-combo"], "dji-osmo-pocket-3-creator-combo": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-nano-128gb": ["sandisk-extreme-pro-256", "dji-osmo-pocket-3-standard"], "dji-action-6-standard": ["sandisk-extreme-pro-256", "dji-osmo-nano-128gb", "dji-mic-mini-2-combo"], "dji-action-6-adventure-combo": ["dji-action-6-standard", "sandisk-extreme-pro-256", "dji-mic-mini-2-combo"], "dji-rs-4-pro-combo": ["dji-rs-4-pro", "dji-mic-3-2tx-1rx-case", "sandisk-extreme-pro-256"], "dji-rs-4-pro": ["dji-rs-4-pro-combo", "dji-rs-4", "dji-mic-3-1tx-1rx"], "dji-rs-5-combo": ["dji-rs5", "dji-rs-4-pro", "dji-mic-3-2tx-1rx-case"], "dji-rs-4": ["dji-rs-4-pro", "dji-rs4-mini", "dji-mic-3-1tx-1rx"], "dji-mic-3-2tx-1rx-case": ["dji-mic-3-1tx-1rx", "dji-mic-mini-2-combo", "sandisk-extreme-pro-256"], "dji-mic-3-1tx-1rx": ["dji-mic-3-2tx-1rx-case", "dji-mic-mini-2-combo", "rod-videomic-pro-plus"]}.items():
         for priority, target in enumerate(targets):
             exists = await session.scalar(select(ProductCrossSell).where(ProductCrossSell.product_id == product_ids[source], ProductCrossSell.cross_sell_product_id == product_ids[target]))
             if exists is None:
