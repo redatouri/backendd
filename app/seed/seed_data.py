@@ -288,6 +288,126 @@ async def upsert_category(session: AsyncSession, slug: str, names: tuple[str, st
     return category
 
 
+async def ensure_categories(session: AsyncSession) -> dict[str, object]:
+    category_ids: dict[str, object] = {}
+    for index, (slug, (fr, ar, en, children)) in enumerate(CATEGORIES.items()):
+        parent = await upsert_category(session, slug, (fr, ar, en), order=index)
+        category_ids[slug] = parent.id
+        for child_index, child_slug in enumerate(children):
+            child_name = SUBCATEGORY_FR[child_slug]
+            child = await upsert_category(session, child_slug, (child_name, child_name, child_name), parent.id, child_index)
+            category_ids[child_slug] = child.id
+    await session.flush()
+    return category_ids
+
+
+def seed_image_count(slug: str) -> int:
+    return {
+        "dji-osmo-nano-128gb": 1,
+        "dji-osmo-mobile-7": 5,
+        "dji-osmo-mobile-7p": 2,
+        "dji-osmo-mobile-8": 3,
+        "dji-action-6-standard": 3,
+        "dji-action-6-adventure-combo": 3,
+        "dji-rs4-mini": 3,
+        "dji-rs5": 3,
+    }.get(slug, 4)
+
+
+async def create_seed_product(
+    session: AsyncSession,
+    index: int,
+    slug: str,
+    category_slug: str,
+    name: str,
+    headline: str,
+    offers: list,
+    category_ids: dict[str, object],
+) -> Product:
+    product = Product(
+        category_id=category_ids[category_slug],
+        slug=slug,
+        rating=Decimal("4.8"),
+        review_count=24 + index * 7,
+        is_featured=index < 6,
+        sort_order=index,
+        is_active=True,
+    )
+    session.add(product)
+    await session.flush()
+    for locale in ("fr", "ar", "en"):
+        description = PRODUCT_DESCRIPTIONS.get(slug, f"{headline}. Pensé pour les créateurs exigeants au Maroc.")
+        session.add(
+            ProductTranslation(
+                product_id=product.id,
+                locale=locale,
+                name=name,
+                headline=headline,
+                subheadline="Équipement professionnel, original et garanti.",
+                description=description,
+                short_description=headline,
+                meta_title=name,
+                meta_description=headline,
+            )
+        )
+    if slug in PRODUCT_IMAGES:
+        session.add(
+            ProductImage(
+                product_id=product.id,
+                url=PRODUCT_IMAGES[slug],
+                alt_text=name,
+                sort_order=0,
+                is_lifestyle=False,
+            )
+        )
+    else:
+        image_count = seed_image_count(slug)
+        for image_index in range(image_count):
+            session.add(
+                ProductImage(
+                    product_id=product.id,
+                    url=f"/media/placeholders/{slug}-{image_index}.webp",
+                    alt_text=name,
+                    sort_order=image_index,
+                    is_lifestyle=image_index == image_count - 1,
+                )
+            )
+    for sort_order, (spec_key, spec_value) in enumerate(PRODUCT_SPECS.get(slug, DEFAULT_PRODUCT_SPECS)):
+        session.add(ProductSpec(product_id=product.id, locale="fr", spec_key=spec_key, spec_value=spec_value, sort_order=sort_order))
+    for offer_index, (label, sku, price, compare_at, stock, badge) in enumerate(offers):
+        session.add(
+            ProductOffer(
+                product_id=product.id,
+                sku=sku,
+                label=label,
+                price=Decimal(str(price)),
+                compare_at_price=Decimal(str(compare_at)) if compare_at else None,
+                stock=stock,
+                is_default=offer_index == 0,
+                badge=badge,
+                sort_order=offer_index,
+            )
+        )
+    return product
+
+
+async def sync_missing_seed_products(session: AsyncSession) -> int:
+    category_ids = await ensure_categories(session)
+    added = 0
+    for index, (slug, category_slug, name, headline, offers) in enumerate(PRODUCTS):
+        if slug in REMOVED_PRODUCT_SLUGS:
+            continue
+        product = await session.scalar(select(Product).where(Product.slug == slug))
+        if product is not None:
+            continue
+        await create_seed_product(session, index, slug, category_slug, name, headline, offers, category_ids)
+        added += 1
+        print(f"Added missing seed product: {slug}", flush=True)
+    if added:
+        await session.flush()
+    return added
+
+
 def copy_seed_media() -> None:
     source_dir = Path(__file__).resolve().parent / "assets" / "placeholders"
     if not source_dir.is_dir():
@@ -362,6 +482,9 @@ async def seed(session: AsyncSession) -> None:
     if light_bootstrap:
         print(f"Light bootstrap: {product_count} products already seeded, skipping full sync", flush=True)
         await deactivate_removed_products(session)
+        added = await sync_missing_seed_products(session)
+        if added:
+            print(f"Light bootstrap: added {added} missing products", flush=True)
         await ensure_admin(session)
         return
 
@@ -369,45 +492,13 @@ async def seed(session: AsyncSession) -> None:
     await deactivate_removed_products(session)
     await ensure_admin(session)
 
-    category_ids: dict[str, object] = {}
-    for index, (slug, (fr, ar, en, children)) in enumerate(CATEGORIES.items()):
-        parent = await upsert_category(session, slug, (fr, ar, en), order=index)
-        category_ids[slug] = parent.id
-        for child_index, child_slug in enumerate(children):
-            child_name = SUBCATEGORY_FR[child_slug]
-            child = await upsert_category(session, child_slug, (child_name, child_name, child_name), parent.id, child_index)
-            category_ids[child_slug] = child.id
-    await session.flush()
+    category_ids = await ensure_categories(session)
 
     product_ids: dict[str, object] = {}
     for index, (slug, category_slug, name, headline, offers) in enumerate(PRODUCTS):
         product = await session.scalar(select(Product).where(Product.slug == slug))
         if product is None:
-            product = Product(category_id=category_ids[category_slug], slug=slug, rating=Decimal("4.8"), review_count=24 + index * 7, is_featured=index < 6, sort_order=index)
-            session.add(product)
-            await session.flush()
-            for locale in ("fr", "ar", "en"):
-                description = PRODUCT_DESCRIPTIONS.get(slug, f"{headline}. Pensé pour les créateurs exigeants au Maroc.")
-                session.add(ProductTranslation(product_id=product.id, locale=locale, name=name, headline=headline, subheadline="Équipement professionnel, original et garanti.", description=description, short_description=headline, meta_title=name, meta_description=headline))
-            if slug in PRODUCT_IMAGES:
-                session.add(ProductImage(product_id=product.id, url=PRODUCT_IMAGES[slug], alt_text=name, sort_order=0, is_lifestyle=False))
-            else:
-                image_count = {
-                    "dji-osmo-nano-128gb": 1,
-                    "dji-osmo-mobile-7": 5,
-                    "dji-osmo-mobile-7p": 2,
-                    "dji-osmo-mobile-8": 3,
-                    "dji-action-6-standard": 3,
-                    "dji-action-6-adventure-combo": 3,
-                    "dji-rs4-mini": 3,
-                    "dji-rs5": 3,
-                }.get(slug, 4)
-                for image_index in range(image_count):
-                    session.add(ProductImage(product_id=product.id, url=f"/media/placeholders/{slug}-{image_index}.webp", alt_text=name, sort_order=image_index, is_lifestyle=image_index == image_count - 1))
-            for sort_order, (spec_key, spec_value) in enumerate(PRODUCT_SPECS.get(slug, DEFAULT_PRODUCT_SPECS)):
-                session.add(ProductSpec(product_id=product.id, locale="fr", spec_key=spec_key, spec_value=spec_value, sort_order=sort_order))
-            for offer_index, (label, sku, price, compare_at, stock, badge) in enumerate(offers):
-                session.add(ProductOffer(product_id=product.id, sku=sku, label=label, price=Decimal(str(price)), compare_at_price=Decimal(str(compare_at)) if compare_at else None, stock=stock, is_default=offer_index == 0, badge=badge, sort_order=offer_index))
+            product = await create_seed_product(session, index, slug, category_slug, name, headline, offers, category_ids)
         elif slug in PRODUCT_IMAGES:
             await sync_seed_product(session, product, name, headline, offers)
         product_ids[slug] = product.id
