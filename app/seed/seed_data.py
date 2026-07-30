@@ -314,6 +314,161 @@ def seed_image_count(slug: str) -> int:
     }.get(slug, 4)
 
 
+async def find_product_by_offer_sku(session: AsyncSession, sku: str) -> Product | None:
+    offer = await session.scalar(select(ProductOffer).where(ProductOffer.sku == sku))
+    if offer is None:
+        return None
+    return await session.scalar(select(Product).where(Product.id == offer.product_id))
+
+
+async def upsert_product_offers(
+    session: AsyncSession,
+    product_id: object,
+    slug: str,
+    offers: list,
+) -> None:
+    for offer_index, (label, sku, price, compare_at, stock, badge) in enumerate(offers):
+        existing = await session.scalar(select(ProductOffer).where(ProductOffer.sku == sku))
+        if existing is not None:
+            if existing.product_id != product_id:
+                print(
+                    f"Skip offer {sku} for {slug}: SKU already used by product {existing.product_id}",
+                    flush=True,
+                )
+                continue
+            existing.label = label
+            existing.price = Decimal(str(price))
+            existing.compare_at_price = Decimal(str(compare_at)) if compare_at else None
+            existing.stock = stock
+            existing.is_default = offer_index == 0
+            existing.badge = badge
+            existing.sort_order = offer_index
+            continue
+
+        session.add(
+            ProductOffer(
+                product_id=product_id,
+                sku=sku,
+                label=label,
+                price=Decimal(str(price)),
+                compare_at_price=Decimal(str(compare_at)) if compare_at else None,
+                stock=stock,
+                is_default=offer_index == 0,
+                badge=badge,
+                sort_order=offer_index,
+            )
+        )
+
+
+async def ensure_product_translations(
+    session: AsyncSession,
+    product_id: object,
+    slug: str,
+    name: str,
+    headline: str,
+) -> None:
+    for locale in ("fr", "ar", "en"):
+        description = PRODUCT_DESCRIPTIONS.get(slug, f"{headline}. Pensé pour les créateurs exigeants au Maroc.")
+        translation = await session.scalar(
+            select(ProductTranslation).where(
+                ProductTranslation.product_id == product_id,
+                ProductTranslation.locale == locale,
+            )
+        )
+        if translation is None:
+            session.add(
+                ProductTranslation(
+                    product_id=product_id,
+                    locale=locale,
+                    name=name,
+                    headline=headline,
+                    subheadline="Équipement professionnel, original et garanti.",
+                    description=description,
+                    short_description=headline,
+                    meta_title=name,
+                    meta_description=headline,
+                )
+            )
+            continue
+        translation.name = name
+        translation.headline = headline
+        translation.subheadline = "Équipement professionnel, original et garanti."
+        translation.description = description
+        translation.short_description = headline
+        translation.meta_title = name
+        translation.meta_description = headline
+
+
+async def ensure_product_images(session: AsyncSession, product_id: object, slug: str, name: str) -> None:
+    image_count = await session.scalar(
+        select(func.count()).select_from(ProductImage).where(ProductImage.product_id == product_id)
+    )
+    if image_count and image_count > 0:
+        return
+
+    if slug in PRODUCT_IMAGES:
+        session.add(
+            ProductImage(
+                product_id=product_id,
+                url=PRODUCT_IMAGES[slug],
+                alt_text=name,
+                sort_order=0,
+                is_lifestyle=False,
+            )
+        )
+        return
+
+    for image_index in range(seed_image_count(slug)):
+        session.add(
+            ProductImage(
+                product_id=product_id,
+                url=f"/media/placeholders/{slug}-{image_index}.webp",
+                alt_text=name,
+                sort_order=image_index,
+                is_lifestyle=image_index == seed_image_count(slug) - 1,
+            )
+        )
+
+
+async def ensure_product_specs(session: AsyncSession, product_id: object, slug: str) -> None:
+    spec_count = await session.scalar(
+        select(func.count()).select_from(ProductSpec).where(ProductSpec.product_id == product_id)
+    )
+    if spec_count and spec_count > 0:
+        return
+
+    for sort_order, (spec_key, spec_value) in enumerate(PRODUCT_SPECS.get(slug, DEFAULT_PRODUCT_SPECS)):
+        session.add(
+            ProductSpec(
+                product_id=product_id,
+                locale="fr",
+                spec_key=spec_key,
+                spec_value=spec_value,
+                sort_order=sort_order,
+            )
+        )
+
+
+async def apply_seed_product_data(
+    session: AsyncSession,
+    product: Product,
+    index: int,
+    slug: str,
+    category_slug: str,
+    name: str,
+    headline: str,
+    offers: list,
+    category_ids: dict[str, object],
+) -> None:
+    product.category_id = category_ids[category_slug]
+    product.is_active = True
+    product.sort_order = index
+    await ensure_product_translations(session, product.id, slug, name, headline)
+    await ensure_product_images(session, product.id, slug, name)
+    await ensure_product_specs(session, product.id, slug)
+    await upsert_product_offers(session, product.id, slug, offers)
+
+
 async def create_seed_product(
     session: AsyncSession,
     index: int,
@@ -335,76 +490,54 @@ async def create_seed_product(
     )
     session.add(product)
     await session.flush()
-    for locale in ("fr", "ar", "en"):
-        description = PRODUCT_DESCRIPTIONS.get(slug, f"{headline}. Pensé pour les créateurs exigeants au Maroc.")
-        session.add(
-            ProductTranslation(
-                product_id=product.id,
-                locale=locale,
-                name=name,
-                headline=headline,
-                subheadline="Équipement professionnel, original et garanti.",
-                description=description,
-                short_description=headline,
-                meta_title=name,
-                meta_description=headline,
-            )
-        )
-    if slug in PRODUCT_IMAGES:
-        session.add(
-            ProductImage(
-                product_id=product.id,
-                url=PRODUCT_IMAGES[slug],
-                alt_text=name,
-                sort_order=0,
-                is_lifestyle=False,
-            )
-        )
-    else:
-        image_count = seed_image_count(slug)
-        for image_index in range(image_count):
-            session.add(
-                ProductImage(
-                    product_id=product.id,
-                    url=f"/media/placeholders/{slug}-{image_index}.webp",
-                    alt_text=name,
-                    sort_order=image_index,
-                    is_lifestyle=image_index == image_count - 1,
-                )
-            )
-    for sort_order, (spec_key, spec_value) in enumerate(PRODUCT_SPECS.get(slug, DEFAULT_PRODUCT_SPECS)):
-        session.add(ProductSpec(product_id=product.id, locale="fr", spec_key=spec_key, spec_value=spec_value, sort_order=sort_order))
-    for offer_index, (label, sku, price, compare_at, stock, badge) in enumerate(offers):
-        session.add(
-            ProductOffer(
-                product_id=product.id,
-                sku=sku,
-                label=label,
-                price=Decimal(str(price)),
-                compare_at_price=Decimal(str(compare_at)) if compare_at else None,
-                stock=stock,
-                is_default=offer_index == 0,
-                badge=badge,
-                sort_order=offer_index,
-            )
-        )
+    await apply_seed_product_data(session, product, index, slug, category_slug, name, headline, offers, category_ids)
     return product
 
 
 async def sync_missing_seed_products(session: AsyncSession) -> int:
     category_ids = await ensure_categories(session)
     added = 0
+    reconciled = 0
+
     for index, (slug, category_slug, name, headline, offers) in enumerate(PRODUCTS):
         if slug in REMOVED_PRODUCT_SLUGS:
             continue
-        product = await session.scalar(select(Product).where(Product.slug == slug))
+
+        async with session.no_autoflush:
+            product = await session.scalar(select(Product).where(Product.slug == slug))
+            if product is None:
+                for offer in offers:
+                    product = await find_product_by_offer_sku(session, offer[1])
+                    if product is not None:
+                        break
+
         if product is not None:
+            slug_owner = await session.scalar(select(Product).where(Product.slug == slug))
+            if slug_owner is not None and slug_owner.id != product.id:
+                print(f"Skip {slug}: slug already belongs to another product", flush=True)
+                continue
+
+            if product.slug != slug:
+                print(f"Reconciled product by SKU: {product.slug} -> {slug}", flush=True)
+                product.slug = slug
+                reconciled += 1
+
+            await apply_seed_product_data(
+                session, product, index, slug, category_slug, name, headline, offers, category_ids
+            )
             continue
-        await create_seed_product(session, index, slug, category_slug, name, headline, offers, category_ids)
+
+        async with session.no_autoflush:
+            await create_seed_product(
+                session, index, slug, category_slug, name, headline, offers, category_ids
+            )
         added += 1
         print(f"Added missing seed product: {slug}", flush=True)
-    if added:
+
+    if added or reconciled:
         await session.flush()
+    if reconciled:
+        print(f"Light bootstrap: reconciled {reconciled} products by SKU", flush=True)
     return added
 
 
@@ -420,27 +553,23 @@ def copy_seed_media() -> None:
 
 
 async def sync_seed_product(session: AsyncSession, product: Product, name: str, headline: str, offers: list) -> None:
-    translations = await session.scalars(select(ProductTranslation).where(ProductTranslation.product_id == product.id))
-    for translation in translations:
-        translation.name = name
-        translation.headline = headline
-        translation.short_description = headline
-        translation.meta_title = name
-        translation.meta_description = headline
+    await ensure_product_translations(session, product.id, product.slug, name, headline)
 
     existing_offers = await session.scalars(select(ProductOffer).where(ProductOffer.product_id == product.id))
+    seed_skus = {offer[1] for offer in offers}
     for offer in existing_offers:
-        await session.delete(offer)
+        if offer.sku not in seed_skus:
+            await session.delete(offer)
     await session.flush()
-    for offer_index, (label, sku, price, compare_at, stock, badge) in enumerate(offers):
-        session.add(ProductOffer(product_id=product.id, sku=sku, label=label, price=Decimal(str(price)), compare_at_price=Decimal(str(compare_at)) if compare_at else None, stock=stock, is_default=offer_index == 0, badge=badge, sort_order=offer_index))
+    await upsert_product_offers(session, product.id, product.slug, offers)
 
-    existing_images = await session.scalars(select(ProductImage).where(ProductImage.product_id == product.id))
-    for image in existing_images:
-        await session.delete(image)
-    await session.flush()
-    image_url = PRODUCT_IMAGES[product.slug]
-    session.add(ProductImage(product_id=product.id, url=image_url, alt_text=name, sort_order=0, is_lifestyle=False))
+    if product.slug in PRODUCT_IMAGES:
+        existing_images = await session.scalars(select(ProductImage).where(ProductImage.product_id == product.id))
+        for image in existing_images:
+            await session.delete(image)
+        await session.flush()
+        image_url = PRODUCT_IMAGES[product.slug]
+        session.add(ProductImage(product_id=product.id, url=image_url, alt_text=name, sort_order=0, is_lifestyle=False))
 
 
 async def deactivate_removed_products(session: AsyncSession) -> None:
