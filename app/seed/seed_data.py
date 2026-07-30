@@ -1,10 +1,11 @@
 import asyncio
+import os
 import shutil
 from decimal import Decimal
 from pathlib import Path
 
 import bcrypt
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -337,15 +338,35 @@ async def deactivate_removed_products(session: AsyncSession) -> None:
             await session.delete(link)
 
 
-async def seed(session: AsyncSession) -> None:
-    copy_seed_media()
-    await deactivate_removed_products(session)
+async def ensure_admin(session: AsyncSession) -> None:
     admin = await session.scalar(select(Admin).where(Admin.email == settings.admin_email))
     if admin is None:
-        session.add(Admin(email=settings.admin_email, password_hash=hash_password(settings.admin_password), full_name="Moviecam Admin"))
+        session.add(
+            Admin(
+                email=settings.admin_email,
+                password_hash=hash_password(settings.admin_password),
+                full_name="Moviecam Admin",
+            )
+        )
     else:
         admin.password_hash = hash_password(settings.admin_password)
         admin.is_active = True
+
+
+async def seed(session: AsyncSession) -> None:
+    product_count = int(await session.scalar(select(func.count()).select_from(Product)) or 0)
+    force_sync = os.getenv("SEED_FORCE_SYNC", "").lower() in {"1", "true", "yes"}
+    light_bootstrap = product_count > 0 and not force_sync
+
+    if light_bootstrap:
+        print(f"Light bootstrap: {product_count} products already seeded, skipping full sync", flush=True)
+        await deactivate_removed_products(session)
+        await ensure_admin(session)
+        return
+
+    copy_seed_media()
+    await deactivate_removed_products(session)
+    await ensure_admin(session)
 
     category_ids: dict[str, object] = {}
     for index, (slug, (fr, ar, en, children)) in enumerate(CATEGORIES.items()):
@@ -399,9 +420,11 @@ async def seed(session: AsyncSession) -> None:
 
 
 async def main() -> None:
+    print("Running seed...", flush=True)
     async with async_session() as session:
         async with session.begin():
             await seed(session)
+    print("Seed complete.", flush=True)
 
 
 if __name__ == "__main__":
