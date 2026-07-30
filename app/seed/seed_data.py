@@ -503,7 +503,7 @@ async def sync_missing_seed_products(session: AsyncSession) -> int:
         if slug in REMOVED_PRODUCT_SLUGS:
             continue
 
-        async with session.no_autoflush:
+        with session.no_autoflush:
             product = await session.scalar(select(Product).where(Product.slug == slug))
             if product is None:
                 for offer in offers:
@@ -527,7 +527,7 @@ async def sync_missing_seed_products(session: AsyncSession) -> int:
             )
             continue
 
-        async with session.no_autoflush:
+        with session.no_autoflush:
             await create_seed_product(
                 session, index, slug, category_slug, name, headline, offers, category_ids
             )
