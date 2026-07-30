@@ -9,8 +9,16 @@ from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
 from app.core.security import get_current_admin
-from app.models import Admin, Order, OrderItem, Product, ProductOffer
-from app.schemas.order import OrderOut, OrderStatusPatchIn
+from app.models import Order, OrderItem, Product, ProductOffer
+from app.schemas.admin_product import (
+    AdminCategoryOptionOut,
+    AdminProductCreateIn,
+    AdminProductDetailOut,
+    AdminProductListOut,
+    AdminProductUpdateIn,
+)
+from app.schemas.order import OrderStatusPatchIn
+from app.services import admin_product_service
 from app.services.order_service import order_to_out
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(get_current_admin)])
@@ -50,6 +58,51 @@ async def admin_stats(db: AsyncSession = Depends(get_db)):
             for o in low_stock
         ],
     }
+
+
+@router.get("/categories", response_model=list[AdminCategoryOptionOut])
+async def list_categories(db: AsyncSession = Depends(get_db)):
+    return await admin_product_service.list_admin_categories(db)
+
+
+@router.get("/products", response_model=AdminProductListOut)
+async def list_products(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100),
+    search: str | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    items, total = await admin_product_service.list_admin_products(
+        db, page=page, limit=limit, search=search
+    )
+    return AdminProductListOut(items=items, total=total, page=page, limit=limit)
+
+
+@router.post("/products", response_model=AdminProductDetailOut, status_code=201)
+async def create_product(payload: AdminProductCreateIn, db: AsyncSession = Depends(get_db)):
+    return await admin_product_service.create_admin_product(db, payload)
+
+
+@router.get("/products/{product_id}", response_model=AdminProductDetailOut)
+async def get_product(product_id: UUID, db: AsyncSession = Depends(get_db)):
+    product = await admin_product_service.load_product(db, product_id)
+    if product is None:
+        raise HTTPException(status_code=404, detail={"message": "Product not found", "code": "NOT_FOUND"})
+    return admin_product_service.product_to_admin_detail(product)
+
+
+@router.put("/products/{product_id}", response_model=AdminProductDetailOut)
+async def update_product(
+    product_id: UUID,
+    payload: AdminProductUpdateIn,
+    db: AsyncSession = Depends(get_db),
+):
+    return await admin_product_service.update_admin_product(db, product_id, payload)
+
+
+@router.delete("/products/{product_id}", status_code=204)
+async def delete_product(product_id: UUID, db: AsyncSession = Depends(get_db)):
+    await admin_product_service.delete_admin_product(db, product_id)
 
 
 @router.get("/orders")
