@@ -152,5 +152,5 @@ async def delete_order(db: AsyncSession, order_id: UUID) -> None:
             detail={"message": "Order not found", "code": "NOT_FOUND"},
         )
     await db.execute(delete(OrderItem).where(OrderItem.order_id == order_id))
-    await db.delete(order)
+    await db.execute(delete(Order).where(Order.id == order_id))
     await db.commit()
