@@ -322,7 +322,7 @@ async def create_admin_product(db: AsyncSession, payload: AdminProductCreateIn) 
             )
         )
 
-    for index, spec in enumerate(payload.specs or [AdminSpecIn(spec_key="Garantie", spec_value="Garantie constructeur")]):
+    for index, spec in enumerate(payload.specs or []):
         db.add(
             ProductSpec(
                 product_id=product.id,

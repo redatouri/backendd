@@ -56,7 +56,9 @@ SUBCATEGORY_FR = {
     "action-cameras": "Caméras action", "drones-consumer": "Drones", "drones-accessories": "Accessoires drones",
 }
 
-DEFAULT_PRODUCT_SPECS = [("Garantie", "Garantie constructeur")]
+DEFAULT_PRODUCT_SPECS: list[tuple[str, str]] = []
+
+WARRANTY_SPEC_KEYS = ("garantie", "warranty", "ضمان")
 
 PRODUCT_SPECS: dict[str, list[tuple[str, str]]] = {
     "dji-rs4-mini": [
@@ -449,6 +451,20 @@ async def ensure_product_images(session: AsyncSession, product_id: object, slug:
     await sync_seed_product_images(session, product_id, slug, name)
 
 
+async def remove_warranty_specs(session: AsyncSession) -> int:
+    specs = (
+        await session.scalars(
+            select(ProductSpec).where(func.lower(ProductSpec.spec_key).in_(WARRANTY_SPEC_KEYS))
+        )
+    ).all()
+    if not specs:
+        return 0
+    for spec in specs:
+        await session.delete(spec)
+    await session.flush()
+    return len(specs)
+
+
 async def ensure_product_specs(session: AsyncSession, product_id: object, slug: str) -> None:
     spec_count = await session.scalar(
         select(func.count()).select_from(ProductSpec).where(ProductSpec.product_id == product_id)
@@ -647,6 +663,9 @@ async def seed(session: AsyncSession) -> None:
         images_fixed = await sync_all_seed_product_images(session)
         if images_fixed:
             print(f"Light bootstrap: fixed images for {images_fixed} products", flush=True)
+        removed_specs = await remove_warranty_specs(session)
+        if removed_specs:
+            print(f"Light bootstrap: removed {removed_specs} warranty placeholder specs", flush=True)
         await ensure_admin(session)
         return
 
@@ -665,6 +684,10 @@ async def seed(session: AsyncSession) -> None:
             await sync_seed_product(session, product, name, headline, offers)
         product_ids[slug] = product.id
     await session.flush()
+
+    removed_specs = await remove_warranty_specs(session)
+    if removed_specs:
+        print(f"Removed {removed_specs} warranty placeholder specs", flush=True)
 
     for source, targets in {"sony-a7iv": ["sandisk-extreme-pro-128-v30", "sony-np-fz100", "sony-fe-50mm-f18"], "sony-fx3": ["sandisk-extreme-pro-128-v30", "sony-np-fz100", "sony-a7iv", "sony-fe-24-70-f28-gm"], "sony-a7iii": ["sandisk-extreme-pro-128-v30", "sony-np-fz100", "sony-a7iv", "sony-fe-50mm-f18"], "sony-fe-50mm-f18": ["sony-a7iv", "sony-a7iii"], "sony-fe-24-70-f4": ["sony-a7iii", "sandisk-extreme-pro-128-v30"], "sony-fe-24-70-f28-gm": ["sony-a7iv", "sony-fx3", "sandisk-extreme-pro-128-v30"], "sony-np-fz100": ["sony-a7iv", "sony-fx3", "sony-fx30"], "sony-fx30": ["sony-np-fz100", "sandisk-extreme-pro-128-v30", "sony-fe-24-70-f28-gm"], "dji-osmo-pocket-4-creator-combo": ["sandisk-extreme-pro-128-v30", "dji-osmo-pocket-4-standard", "dji-mic-mini-2-combo"], "dji-osmo-pocket-4-standard": ["sandisk-extreme-pro-128-v30", "dji-osmo-pocket-4-creator-combo", "dji-mic-mini-2-combo"], "godox-v1-sony": ["godox-ak-r22", "godox-lc500r-mini"], "godox-ak-r22": ["godox-v1-sony", "godox-lc500r-mini"], "godox-lc500r-mini": ["godox-v1-sony", "godox-ak-r22"], "dji-mic-mini-2-combo": ["sandisk-extreme-pro-128-v30", "rode-videomic-go"], "dji-rs4-mini": ["sony-np-fz100", "sandisk-extreme-pro-128-v30", "dji-mic-mini-2-combo"], "dji-rs5": ["sony-np-fz100", "sandisk-extreme-pro-128-v30", "dji-rs4-mini"], "dji-osmo-mobile-7": ["dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-mobile-7p": ["dji-osmo-mobile-7", "dji-osmo-pocket-3-standard"], "dji-osmo-mobile-8": ["dji-osmo-mobile-7p", "dji-osmo-pocket-3-standard"], "dji-osmo-pocket-3-standard": ["sandisk-extreme-pro-128-v30", "dji-mic-mini-2-combo"], "dji-osmo-pocket-3-creator-combo": ["sandisk-extreme-pro-128-v30", "dji-osmo-pocket-3-standard", "dji-mic-mini-2-combo"], "dji-osmo-nano-128gb": ["sandisk-extreme-pro-128-v30", "dji-osmo-pocket-3-standard"], "dji-action-6-standard": ["sandisk-extreme-pro-128-v30", "dji-osmo-nano-128gb", "dji-mic-mini-2-combo"], "dji-action-6-adventure-combo": ["dji-action-6-standard", "sandisk-extreme-pro-128-v30", "dji-mic-mini-2-combo"], "dji-rs-4-pro-combo": ["dji-rs-4-pro", "dji-mic-3-2tx-1rx-case", "sandisk-extreme-pro-128-v30"], "dji-rs-4-pro": ["dji-rs-4-pro-combo", "dji-rs-4", "dji-mic-3-1tx-1rx"], "dji-rs-5-combo": ["dji-rs5", "dji-rs-4-pro", "dji-mic-3-2tx-1rx-case"], "dji-rs-4": ["dji-rs-4-pro", "dji-rs4-mini", "dji-mic-3-1tx-1rx"], "dji-mic-3-2tx-1rx-case": ["dji-mic-3-1tx-1rx", "dji-mic-mini-2-combo", "sandisk-extreme-pro-128-v30"], "dji-mic-3-1tx-1rx": ["dji-mic-3-2tx-1rx-case", "dji-mic-mini-2-combo", "rode-videomic-go"], "sac-lolobo-grand": ["sac-camera", "sony-a7iv", "tripod-candc-dc-6918"], "sac-camera": ["sac-lolobo-grand", "sony-a7iii"], "tripod-candc-dc-999": ["tripod-candc-dc-6917", "tripod-candc-dc-6918", "sac-camera"], "tripod-candc-dc-6917": ["tripod-candc-dc-6918", "tripod-candc-dc-999"], "tripod-candc-dc-6918": ["tripod-candc-dc-6917", "dji-rs-4-pro"], "feelworld-tp10": ["feelworld-f5-prox", "sony-a7iv"], "kodak-gold-200-film-bundle": ["sony-a7iii", "sony-fe-50mm-f18"], "deity-v-mic-d3-pro": ["rode-videomic-go", "rode-videomic-go"], "rode-videomic-go": ["deity-v-mic-d3-pro", "rode-videomic-go"], "rode-wireless-go-ii-dual": ["rode-wireless-go-ii-single", "dji-mic-mini-2-combo"], "rode-wireless-go-ii-single": ["rode-wireless-go-ii-dual", "dji-mic-mini-2-combo"], "tamron-28-75-f28-g2-sony-fe": ["sony-a7iv", "sony-fe-24-70-f28-gm", "kf-concept-nano-b-nd2-400"]}.items():
         for priority, target in enumerate(targets):
