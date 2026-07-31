@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -19,6 +19,7 @@ from app.schemas.admin_product import (
 )
 from app.schemas.order import OrderStatusPatchIn
 from app.services import admin_product_service
+from app.services.media_service import save_product_image
 from app.services.order_service import delete_order, order_to_out
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(get_current_admin)])
@@ -103,6 +104,16 @@ async def update_product(
 @router.delete("/products/{product_id}", status_code=204)
 async def delete_product(product_id: UUID, db: AsyncSession = Depends(get_db)):
     await admin_product_service.delete_admin_product(db, product_id)
+
+
+@router.post("/upload/product-image")
+async def upload_product_image(
+    file: UploadFile = File(...),
+    slug: str = Form(...),
+    index: int = Form(0),
+):
+    url = await save_product_image(file, slug, index)
+    return {"url": url}
 
 
 @router.get("/orders")
