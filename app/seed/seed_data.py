@@ -682,6 +682,19 @@ async def seed(session: AsyncSession) -> None:
         images_fixed = await sync_all_seed_product_images(session)
         if images_fixed:
             print(f"Light bootstrap: fixed images for {images_fixed} products", flush=True)
+        for slug in PRODUCT_GALLERIES:
+            product = await session.scalar(select(Product).where(Product.slug == slug))
+            if product is None:
+                continue
+            seed_row = next((row for row in PRODUCTS if row[0] == slug), None)
+            if seed_row is None:
+                continue
+            _slug, category_slug, name, headline, offers = seed_row
+            category_ids = await ensure_categories(session)
+            await apply_seed_product_data(
+                session, product, 0, slug, category_slug, name, headline, offers, category_ids
+            )
+            print(f"Light bootstrap: refreshed gallery product {slug}", flush=True)
         removed_specs = await remove_warranty_specs(session)
         if removed_specs:
             print(f"Light bootstrap: removed {removed_specs} warranty placeholder specs", flush=True)
