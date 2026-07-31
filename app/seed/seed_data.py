@@ -129,6 +129,14 @@ REMOVED_PRODUCT_SLUGS = (
     "pack-podcast-starter",
 )
 
+PRODUCT_GALLERIES: dict[str, list[str]] = {
+    "dji-mic-mini-2-combo": [
+        "/products/dji-mic-mini-2-combo-0.webp",
+        "/products/dji-mic-mini-2-combo-1.webp",
+        "/products/dji-mic-mini-2-combo-2.webp",
+    ],
+}
+
 PRODUCT_IMAGES = {
     "sony-a7iv": "/media/placeholders/sony-a7iv-0.png",
     "sony-fx3": "/media/placeholders/sony-fx3-0.png",
@@ -213,7 +221,12 @@ PRODUCTS = [
     ("godox-v1-sony", "lighting-led-panels", "Godox v1 sony", "Godox v1 sony", [("Neuf", "GODOX-V1-SONY", 1999, None, 8, None)]),
     ("godox-ak-r22", "lighting-softboxes", "Godox ak-r22", "Godox ak-r22", [("Neuf", "GODOX-AKR22", 299, None, 12, None)]),
     ("godox-lc500r-mini", "lighting-tubes", "Godox lc500r mini", "Godox lc500r mini", [("Neuf", "GODOX-LC500R-MINI", 1450, None, 6, None)]),
-    ("kf-concept-nano-b-nd2-400", "accessories-filters", "K&F Concept Nano-B Filtre ND2-400", "K&F Concept Nano-B Filtre ND2-400", [("Neuf", "KF-NANOB-ND2400", 350, None, 10, None)]),
+    ("kf-concept-nano-b-nd2-400", "lenses-adapters", "K&F Concept Nano-B Filtre ND2-400", "K&F Concept Nano-B Filtre ND2-400", [
+        ("62mm", "KF-NANOB-ND2400-62", 350, None, 10, None),
+        ("67mm", "KF-NANOB-ND2400-67", 350, None, 10, None),
+        ("72mm", "KF-NANOB-ND2400-72", 350, None, 10, None),
+        ("82mm", "KF-NANOB-ND2400-82", 350, None, 10, None),
+    ]),
     ("hollyland-lark-m2s", "audio-wireless", "Hollyland lark m2s", "Hollyland lark m2s", [("Neuf", "HOLLYLAND-LARK-M2S", 1400, None, 8, None)]),
     ("torche-r8-led-rgb", "lighting-led-panels", "Torche R8 LED RGB", "Torche R8 LED RGB", [("Neuf", "TORCHE-R8-RGB", 899, None, 10, None)]),
     ("desview-p5-ii", "monitors-on-camera", "BESTVIEW DESVIEW P5 II 5,5'' Full HD", "BESTVIEW DESVIEW P5 II 5,5'' Full HD", [("Neuf", "DESVIEW-P5-II", 1500, None, 5, None)]),
@@ -406,6 +419,8 @@ async def ensure_product_translations(
 
 
 def seed_image_urls(slug: str) -> list[str]:
+    if slug in PRODUCT_GALLERIES:
+        return PRODUCT_GALLERIES[slug]
     if slug in PRODUCT_IMAGES:
         return [PRODUCT_IMAGES[slug]]
     count = seed_image_count(slug)
