@@ -19,7 +19,7 @@ from app.schemas.admin_product import (
 )
 from app.schemas.order import OrderStatusPatchIn
 from app.services import admin_product_service
-from app.services.order_service import order_to_out
+from app.services.order_service import delete_order, order_to_out
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(get_current_admin)])
 
@@ -150,3 +150,8 @@ async def patch_order(order_id: UUID, payload: OrderStatusPatchIn, db: AsyncSess
     items = (await db.scalars(select(OrderItem).where(OrderItem.order_id == order.id))).all()
     out = order_to_out(order, list(items))
     return {**out.model_dump(), "customer": order.customer, "admin_notes": order.admin_notes}
+
+
+@router.delete("/orders/{order_id}", status_code=204)
+async def remove_order(order_id: UUID, db: AsyncSession = Depends(get_db)):
+    await delete_order(db, order_id)

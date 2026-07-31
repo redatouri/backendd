@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -142,3 +142,15 @@ async def get_order_by_number(db: AsyncSession, order_number: str) -> OrderOut |
         return None
     items = (await db.scalars(select(OrderItem).where(OrderItem.order_id == order.id))).all()
     return order_to_out(order, list(items))
+
+
+async def delete_order(db: AsyncSession, order_id: UUID) -> None:
+    order = await db.get(Order, order_id)
+    if order is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"message": "Order not found", "code": "NOT_FOUND"},
+        )
+    await db.execute(delete(OrderItem).where(OrderItem.order_id == order_id))
+    await db.delete(order)
+    await db.commit()
