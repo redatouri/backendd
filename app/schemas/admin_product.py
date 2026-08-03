@@ -108,6 +108,7 @@ class AdminProductDetailOut(BaseModel):
     slug: str
     category_id: UUID
     category_slug: str | None = None
+    category_parent_id: UUID | None = None
     is_active: bool
     is_featured: bool
     sort_order: int

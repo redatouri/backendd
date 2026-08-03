@@ -111,6 +111,7 @@ def product_to_admin_detail(product: Product) -> AdminProductDetailOut:
         slug=product.slug,
         category_id=product.category_id,
         category_slug=product.category.slug if product.category else None,
+        category_parent_id=product.category.parent_id if product.category else None,
         is_active=product.is_active,
         is_featured=product.is_featured,
         sort_order=product.sort_order,
@@ -193,6 +194,8 @@ async def list_admin_categories(db: AsyncSession) -> list[AdminCategoryOptionOut
         await db.scalars(
             select(Category)
             .where(Category.is_active.is_(True))
+            .where(Category.parent_id.is_(None))
+            .where(Category.slug != "action-drones")
             .options(selectinload(Category.translations))
             .order_by(Category.sort_order, Category.slug)
         )
