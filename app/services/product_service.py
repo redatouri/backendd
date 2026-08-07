@@ -55,12 +55,15 @@ def sanitize_product_images(images: list, slug: str) -> list:
     seen: set[str] = set()
     cleaned: list = []
     for img in sorted(images, key=lambda i: i.sort_order):
+        if getattr(img, "is_lifestyle", False):
+            continue
         url = media_url(img.url)
         if not url or url in seen or not image_belongs_to_product(url, slug):
             continue
         seen.add(url)
         cleaned.append(img)
-    return cleaned
+    # Product gallery: primary shot only (no lifestyle/scene thumbnails).
+    return cleaned[:1]
 
 
 def offer_out(offer: ProductOffer) -> OfferOut:
